@@ -1,0 +1,139 @@
+Sub payroll()
+
+Dim wsm As Worksheet
+Set wsm = Worksheets("Do_not_modify_1")
+Dim ws As Worksheet
+Set ws = Worksheets("Do_not_modify_2")
+
+wsm.Cells.Clear
+
+ws.Cells.Clear
+    
+Dim y As Workbook
+Dim fileNameAndPath As Variant
+fileNameAndPath = Application.GetOpenFilename(Title:="Select File To Be Opened")
+If fileNameAndPath = False Then Exit Sub
+Set y = Workbooks.Open(fileNameAndPath)
+   
+y.Sheets(1).Cells.Copy
+wsm.Range("A1").PasteSpecial Paste:=xlPasteValues
+Application.CutCopyMode = False
+y.Close SaveChanges:=False
+
+Dim tax As Range
+
+    Set tax = wsm.Rows(1).Find(What:="Tax", LookIn:=xlValues, _
+    LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=False, SearchFormat:=False)
+
+    If tax Is Nothing Then
+    Set tax = Application.InputBox( _
+      Title:="Tax ID", _
+      Prompt:="Select Column of Tax ID", _
+      Type:=8)
+    End If
+    
+Dim Ben_name As Range
+
+    Set Ben_name = wsm.Rows(1).Find(What:="Beneficiary Name", LookIn:=xlValues, _
+    LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=False, SearchFormat:=False)
+
+    If Ben_name Is Nothing Then
+    Set Ben_name = Application.InputBox( _
+      Title:="Beneficiary Name", _
+      Prompt:="Select Column of Beneficiary Name", _
+      Type:=8)
+    End If
+
+Dim Bank_account As Range
+
+    Set Bank_account = wsm.Rows(1).Find(What:="account", LookIn:=xlValues, _
+    LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=False, SearchFormat:=False)
+
+     If Bank_account Is Nothing Then
+    Set Bank_account = Application.InputBox( _
+      Title:="Bank Account", _
+      Prompt:="Select Column of Bank Account", _
+      Type:=8)
+    End If
+    
+Dim Amount As Range
+
+    Set Amount = wsm.Rows(1).Find(What:="mount", LookIn:=xlValues, _
+    LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=False, SearchFormat:=False)
+
+     If Amount Is Nothing Then
+    Set Amount = Application.InputBox( _
+      Title:="Transaction Amount", _
+      Prompt:="Select Column of Transaction Amounts", _
+      Type:=8)
+    End If
+    
+Dim Reference As Range
+
+    Set Reference = wsm.Rows(1).Find(What:="eference", LookIn:=xlValues, _
+    LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=False, SearchFormat:=False)
+
+    If Reference Is Nothing Then
+    Set Reference = Application.InputBox( _
+      Title:="Reference Number", _
+      Prompt:="Select Column of Reference Number", _
+      Type:=8)
+    End If
+    
+Dim Due_date As Range
+
+    Set Due_date = wsm.Rows(1).Find(What:="ate", LookIn:=xlValues, _
+    LookAt:=xlPart, SearchOrder:=xlByRows, SearchDirection:=xlNext, _
+    MatchCase:=False, SearchFormat:=False)
+
+    If Due_date Is Nothing Then
+    Set Due_date = Application.InputBox( _
+      Title:="Transaction Due Date", _
+      Prompt:="Select Column of Due Date", _
+      Type:=8)
+    End If
+    
+Due_date.EntireColumn.Select
+    Selection.Replace What:=".", Replacement:="/", LookAt:=xlPart, _
+        SearchOrder:=xlByRows, MatchCase:=False
+
+Dim Transact As Long
+    Transact = Application.InputBox( _
+      Title:="Transaction Number", _
+      Prompt:="Enter a starting transaction number for the payments", _
+      Type:=1)
+With wsm
+
+For i = 1 To Rows.Count
+
+If wsm.Cells(i, 1) <> "" Then
+
+ws.Cells(i, 1).Value = "#" & "HU" & "#DFT" & "#" & Format((wsm.Cells(i, Due_date.Column)), "yyyyddmm") & "#11" & "#HUF" & "#" & wsm.Cells(i, Amount.Column) & "##" & "14492011" & _
+"#############" & (Transact + i) & "###################" & Format((wsm.Cells(i, Bank_account.Column).Value), "##0") & "#" & wsm.Cells(i, Ben_name.Column).Value & "######" _
+& "20080004" & "#####################" & wsm.Cells(i, Reference.Column) & "#" & "Adószám " & wsm.Cells(i, tax.Column) & "###########"
+
+ws.Cells(i, 1).NumberFormat = "General"
+
+End If
+
+Next i
+
+End With
+
+ws.SaveAs Filename:=ThisWorkbook.Path & "\" & "HUNGARY" + Format(Now(), "YYYYMMDD") _
+& ".txt", FileFormat:=xlCSVUTF8
+
+MsgBox "Payroll file saved to Macro file location", vbOKOnly
+
+End Sub
+
+
+
+
+
+
