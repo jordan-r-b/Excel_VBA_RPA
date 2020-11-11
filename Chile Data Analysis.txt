@@ -1,0 +1,98 @@
+Sub Chile()
+
+'Delete from results tab'
+
+ Worksheets("RESULTS").Range("A1:K2000").Delete
+ 
+'Copy EXCEPTION hours to temporary sheet'
+
+ Worksheets("EXCEPTIONS").Range("A3:K1000").Copy Worksheets("DO_NOT_MODIFY").Range("A1")
+
+
+'Delete unecessary columns'
+
+   Worksheets("DO_NOT_MODIFY").Select
+   Range("D:G, J:J").Delete
+   
+   
+'Copy content from temp to final'
+
+ Worksheets("DO_NOT_MODIFY").Range("A3:K1000").Copy Worksheets("RESULTS").Range("A1")
+ 
+'Delete content on temporary sheet'
+
+ Worksheets("DO_NOT_MODIFY").Range("A1:K1000").Delete
+ 
+    
+'Copy Hours to temporary sheet'
+
+ Worksheets("HOURS").Range("A3:I1000").Copy Worksheets("DO_NOT_MODIFY").Range("A1")
+
+'Delete unecessary columns'
+
+   Worksheets("DO_NOT_MODIFY").Select
+   Range("D:G, J:J").Delete
+   
+'Copy content from temp to final'
+
+ Worksheets("DO_NOT_MODIFY").Range("A3:K1000").Copy Worksheets("RESULTS").Range("A2000")
+ 
+ 'Delete content on temporary sheet'
+
+ Worksheets("DO_NOT_MODIFY").Range("A1:K1000").Delete
+ 
+  'Delete unecessary ROWS'
+
+Dim C As Range
+Dim i As Long, LastRow As Long
+
+With Sheets("RESULTS")
+    LastRow = .Cells(.Rows.Count, "D").End(xlUp).Row
+    ' always loop backwards when deleting rows
+    For i = LastRow To 1 Step -1
+        If .Range("D" & i).Value = "Late Out" Then .Rows(i).Delete
+        If .Range("D" & i).Value = "Early Out" Then .Rows(i).Delete
+        If .Range("D" & i).Value = "Early In" Then .Rows(i).Delete
+    Next i
+End With
+ 
+ 'Sort columns on Date'
+ 
+ Worksheets("RESULTS").Range("A1:F4000").Sort key1:=Worksheets("RESULTS").Range("b1"), key2:=Worksheets("RESULTS").Range("c1"), order1:=xlAscending, Header:=xlNo
+    
+ 'Divide Seconds by 60 to get minutes on column F'
+ 
+    Worksheets("Results").Range("F1:F1000").FormulaR1C1 = "=RC[-1]/60"
+    Worksheets("Results").Range("G1:G1000").FormulaR1C1 = "=RC[-1]/60"
+
+'Insert new column for using formula to connect employee ID to GEMS ID'
+
+Worksheets("Results").Columns("C:C").Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+      
+'Connect GEMS by Index match with employees tab'
+
+Worksheets("Results").Range("C1:C2000").FormulaR1C1 = "=INDEX(EMPLOYEES!C[-2]:C[1],MATCH(RESULTS!RC[-1],EMPLOYEES!C[-1],0),3)"
+
+'Copy gems column to column b'
+
+ Worksheets("RESULTS").Range("C1:C2000").Copy Worksheets("RESULTS").Range("B1")
+ 
+ 'Delete unecessary column'
+
+   Worksheets("RESULTS").Select
+   Range("C:C").Delete
+        
+'Insert Column Header'
+
+Worksheets("RESULTS").Rows(1).Insert Shift:=xlDown
+
+Worksheets("results").Range("$A$1").Value = "Nombre"
+Worksheets("results").Range("$B$1").Value = "'GEMS"
+Worksheets("results").Range("$C$1").Value = "'Fecha"
+Worksheets("results").Range("$D$1").Value = "'Codigo de Pago"
+Worksheets("results").Range("$E$1").Value = "'Segundos Totales"
+Worksheets("results").Range("$F$1").Value = "'Minutos Totales"
+Worksheets("results").Range("$G$1").Value = "'Horas Totales"
+End Sub
+
+
